@@ -1,0 +1,495 @@
+/* ==========================================================================
+   Steep – استایل‌ها
+   فهرست:
+   1) متغیرها و تم‌ها (روشن / تاریک)
+   2) تنظیمات پایه
+   3) هدر
+   4) چیدمان اصلی (layout)
+   5) لیوان چای و انیمیشن‌ها
+   6) زمان‌سنج و دکمه‌ها
+   7) ستون کناری: انتخاب چای، فنجان‌ها، لیست کارها
+   8) فوتر
+   9) ریسپانسیو و کاهش حرکت
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1) متغیرها و تم‌ها
+   رنگ‌ها یک‌جا تعریف شده‌اند؛ برای تغییر ظاهر سایت فقط همین‌جا را عوض کنید.
+   ========================================================================== */
+
+/* تم روشن (پیش‌فرض) */
+:root {
+  --bg:    #e5eee8;   /* پس‌زمینهٔ صفحه */
+  --card:  #f5faf6;   /* پس‌زمینهٔ کارت‌ها و ورودی‌ها */
+  --ink:   #16302b;   /* رنگ متن اصلی */
+  --muted: #4d6a62;   /* رنگ متن کم‌رنگ‌تر */
+  --line:  #c4d6cc;   /* رنگ خطوط و حاشیه‌ها */
+  --leaf:  #2f7357;   /* رنگ اصلی برند (سبز) */
+  --water: #d9ead7;   /* رنگ آب لیوان در شروع (قبل از چای شدن) */
+  --tea:   #b3600f;   /* رنگ چای دم‌کشیده */
+  --focus: #8a4a0a;   /* رنگ دور المانِ فوکوس‌شده */
+
+  --serif: "Young Serif", Georgia, serif;
+  --sans:  "DM Sans", system-ui, sans-serif;
+}
+
+/* تم تاریک؛ وقتی script.js ویژگی data-theme="dark" را روی html بگذارد فعال می‌شود */
+:root[data-theme="dark"] {
+  --bg:    #0f2622;
+  --card:  #173630;
+  --ink:   #e3f0e8;
+  --muted: #9db9ae;
+  --line:  #2b4d45;
+  --leaf:  #6fc19a;
+  --water: #2f5a4e;
+  --tea:   #e29a3f;
+  --focus: #f0b866;
+}
+
+
+/* ==========================================================================
+   2) تنظیمات پایه
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;  /* padding و border داخل عرض/ارتفاع حساب می‌شوند */
+}
+
+html {
+  color-scheme: light dark;  /* به مرورگر می‌گوید المان‌های پیش‌فرض (مثل scrollbar) هم با تم هماهنگ شوند */
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 1.0625rem/1.6 var(--sans);
+}
+
+/* متنی که فقط برای screen reader است و روی صفحه دیده نمی‌شود */
+.sr {
+  position: absolute;
+  left: -9999px;
+}
+
+a {
+  color: inherit;
+}
+
+/* حلقهٔ فوکوس برای کاربرانی که با کیبورد کار می‌کنند */
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+
+/* ==========================================================================
+   3) هدر
+   ========================================================================== */
+
+.top {
+  display: flex;
+  justify-content: space-between;  /* لوگو سمت چپ، دکمهٔ تم سمت راست */
+  align-items: center;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem;
+}
+
+.brand {
+  font: 400 1.6rem var(--serif);
+  text-decoration: none;
+}
+
+/* دکمهٔ تغییر تم */
+.theme {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: .4rem .9rem;
+  border-radius: 999px;  /* شکل قرصی */
+  font: inherit;
+  font-size: .9rem;
+  cursor: pointer;
+}
+
+.theme:hover {
+  border-color: var(--leaf);
+}
+
+
+/* ==========================================================================
+   4) چیدمان اصلی
+   دو ستون: ستون چپ (stage) کمی پهن‌تر از ستون راست (side)
+   ========================================================================== */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 2.5rem;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 3rem;
+}
+
+/* ستون اصلی (لیوان و تایمر) */
+.stage {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+h1 {
+  font: 400 clamp(2rem, 4.5vw, 3rem)/1.1 var(--serif);  /* clamp: اندازه بین حداقل و حداکثر، با عرض صفحه تغییر می‌کند */
+  margin: 0 auto .75rem;
+  max-width: 14ch;
+}
+
+.lede {
+  color: var(--muted);
+  max-width: 34ch;
+  margin: 0 auto;
+}
+
+h2 {
+  font: 400 1.25rem/1.3 var(--serif);
+  margin: 0 0 .75rem;
+}
+
+
+/* ==========================================================================
+   5) لیوان چای و انیمیشن‌ها
+   ========================================================================== */
+
+.glass {
+  margin: 1.5rem auto 0;
+  width: min(300px, 70vw);  /* حداکثر 300px، ولی در موبایل 70٪ عرض صفحه */
+}
+
+.glass svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+/* رنگ آب: ترکیبی از رنگ آب و رنگ چای؛ نسبت ترکیب را متغیر --p (از 0 تا 1) تعیین می‌کند
+   و script.js هر ثانیه آن را آپدیت می‌کند */
+.water {
+  fill: color-mix(in srgb, var(--tea) calc(var(--p) * 100%), var(--water));
+  transition: fill .8s linear;
+}
+
+/* موج سطح آب؛ همان رنگ آب ولی کمی روشن‌تر */
+.wave {
+  fill: color-mix(in srgb, var(--tea) calc(var(--p) * 100%), var(--water));
+  filter: brightness(1.12);
+  transition: fill .8s linear;
+}
+
+/* خط دور لیوان */
+.rim {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+/* نخ و برچسب teabag */
+.string {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.tag {
+  fill: var(--card);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+/* بخار: در حالت عادی نامرئی است */
+.steam path {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0;
+}
+
+/* وقتی تایمر روشن است (کلاس running روی لیوان)، بخار انیمیشن می‌گیرد */
+.running .steam path {
+  animation: rise 3s ease-in-out infinite;
+}
+
+/* تأخیر متفاوت برای هر خط بخار تا هم‌زمان بالا نروند */
+.running .steam path:nth-child(2) {
+  animation-delay: .8s;
+}
+
+.running .steam path:nth-child(3) {
+  animation-delay: 1.6s;
+}
+
+/* انیمیشن بخار: ظاهر شدن، بالا رفتن و محو شدن */
+@keyframes rise {
+  0%   { opacity: 0;  transform: translateY(8px); }
+  40%  { opacity: .7; }
+  100% { opacity: 0;  transform: translateY(-10px); }
+}
+
+
+/* ==========================================================================
+   6) زمان‌سنج و دکمه‌ها
+   ========================================================================== */
+
+.time {
+  font: 400 clamp(3.5rem, 9vw, 5rem)/1 var(--serif);
+  font-variant-numeric: tabular-nums;  /* عددها هم‌عرض می‌شوند تا زمان هنگام تغییر نلرزد */
+  margin: 1rem 0 .25rem;
+}
+
+.status {
+  color: var(--muted);
+  margin: 0 0 1.25rem;
+  min-height: 1.6em;  /* با عوض شدن متن، صفحه بالا و پایین نمی‌پرد */
+}
+
+.controls {
+  display: flex;
+  gap: .75rem;
+  justify-content: center;
+}
+
+/* دکمهٔ عمومی */
+.btn {
+  font: 500 1rem var(--sans);
+  padding: .7rem 1.4rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.btn:hover {
+  background: var(--line);
+}
+
+/* دکمهٔ اصلی (Start) */
+.btn.main {
+  background: var(--leaf);
+  border-color: var(--leaf);
+  color: #fff;
+  min-width: 7rem;
+}
+
+/* در تم تاریک رنگ سبز روشن است، پس متن دکمه تیره می‌شود تا خوانا بماند */
+:root[data-theme="dark"] .btn.main {
+  color: #0f2622;
+}
+
+.btn.main:hover {
+  filter: brightness(1.08);
+  background: var(--leaf);
+}
+
+
+/* ==========================================================================
+   7) ستون کناری
+   ========================================================================== */
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-top: 1rem;
+}
+
+/* ---- انتخاب نوع چای ---- */
+.brews {
+  display: grid;
+  gap: .6rem;
+}
+
+.brews button {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  text-align: left;
+  padding: .85rem 1rem;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.brews button span {
+  color: var(--muted);
+  font-size: .95rem;
+}
+
+.brews button:hover {
+  border-color: var(--leaf);
+}
+
+/* گزینهٔ انتخاب‌شده: حاشیهٔ سبز + نوار سبز سمت چپ */
+.brews button[aria-checked="true"] {
+  border-color: var(--leaf);
+  box-shadow: inset 4px 0 0 var(--leaf);
+}
+
+/* ---- شمارندهٔ فنجان‌ها ---- */
+.cups {
+  margin: 0 0 .5rem;
+  font-size: 1.05rem;
+}
+
+.cups span {
+  font: 400 2rem var(--serif);
+}
+
+.cup-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  min-height: 26px;
+}
+
+/* هر آیکن فنجان یک مستطیل ذوزنقه‌ای است که با clip-path بریده شده */
+.cup-row i {
+  width: 22px;
+  height: 26px;
+  background: var(--tea);
+  clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%);
+}
+
+/* ---- فرم افزودن کار ---- */
+.add {
+  display: flex;
+  gap: .6rem;
+}
+
+.add input {
+  flex: 1;
+  min-width: 0;  /* اجازه می‌دهد input داخل flex کوچک‌تر شود */
+  padding: .7rem .9rem;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+}
+
+.add input:focus-visible {
+  outline-offset: 1px;
+}
+
+/* پیام خطا */
+.err {
+  color: #b3261e;
+  min-height: 1.4em;
+  margin: .3rem 0;
+  font-size: .95rem;
+}
+
+:root[data-theme="dark"] .err {
+  color: #ff9a90;
+}
+
+/* ---- لیست کارها ---- */
+.tasks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.tasks li {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .7rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.tasks input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--leaf);
+  flex: none;
+}
+
+.tasks label {
+  flex: 1;
+  overflow-wrap: anywhere;  /* کلمهٔ خیلی بلند هم می‌شکند و از کادر بیرون نمی‌زند */
+}
+
+/* کار انجام‌شده: خط‌خورده و کم‌رنگ */
+.tasks .done label {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+/* دکمهٔ Delete */
+.tasks button {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: .9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: .2rem;
+}
+
+.tasks button:hover {
+  color: var(--ink);
+}
+
+/* پیام «لیست خالی است» */
+.empty {
+  color: var(--muted);
+  margin: .75rem 0 0;
+}
+
+
+/* ==========================================================================
+   8) فوتر
+   ========================================================================== */
+
+.foot {
+  text-align: center;
+  color: var(--muted);
+  font-size: .9rem;
+  padding: 1.5rem;
+}
+
+
+/* ==========================================================================
+   9) ریسپانسیو و کاهش حرکت
+   ========================================================================== */
+
+/* موبایل و تبلت: دو ستون تبدیل به یک ستون می‌شود */
+@media (max-width: 820px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* اگر کاربر در سیستمش «کاهش حرکت» را روشن کرده، انیمیشن‌ها خاموش می‌شوند */
+@media (prefers-reduced-motion: reduce) {
+  .water,
+  .wave {
+    transition: none;
+  }
+
+  .running .steam path {
+    animation: none;
+  }
+}

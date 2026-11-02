@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Steep – a focus timer shaped like a glass of tea</title>
+  <meta name="description" content="Pick a tea, focus until it's ready, and keep a tally of your cups.">
+
+  <!-- فونت‌ها از Google Fonts (preconnect باعث می‌شود اتصال سریع‌تر برقرار شود) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Young+Serif&display=swap" rel="stylesheet">
+
+  <!-- فایل استایل اصلی -->
+  <link rel="stylesheet" href="style(1).css">
+</head>
+
+<body>
+
+  <!-- ============================================================
+       هدر: لوگو + دکمهٔ تغییر تم (روشن/تاریک)
+       ============================================================ -->
+  <header class="top">
+    <a class="brand" href="#">Steep</a>
+    <!-- متن این دکمه و تم صفحه را script.js عوض می‌کند -->
+    <button class="theme" id="theme" type="button" aria-label="Switch color theme">Dark mode</button>
+  </header>
+
+
+  <main class="layout">
+
+    <!-- ============================================================
+         ستون اصلی (چپ): لیوان چای، زمان‌سنج و دکمه‌های کنترل
+         ============================================================ -->
+    <section class="stage" aria-labelledby="stage-title">
+      <h1 id="stage-title">Focus until the tea is ready.</h1>
+      <p class="lede">Pick a brew, press start, and watch the glass darken as you work.</p>
+
+      <!-- لیوان چای (SVG)
+           متغیر CSS به اسم --p مقدار پیشرفت زمان را نگه می‌دارد (از 0 تا 1)
+           و جاوااسکریپت آن را آپدیت می‌کند؛ هرچه بزرگ‌تر شود رنگ چای پررنگ‌تر می‌شود -->
+      <figure class="glass" id="glass" style="--p:0">
+        <svg viewBox="0 0 220 280" role="img" aria-label="A glass of tea that darkens as time passes">
+
+          <defs>
+            <!-- شکل لیوان؛ چای فقط داخل همین شکل دیده می‌شود (clip) -->
+            <clipPath id="clip">
+              <path d="M40 60 H180 L164 246 Q162 262 146 262 H74 Q58 262 56 246 Z"/>
+            </clipPath>
+          </defs>
+
+          <!-- بخار؛ فقط وقتی تایمر روشن است انیمیشن دارد -->
+          <g class="steam" aria-hidden="true">
+            <path d="M90 44 C80 34 100 26 90 14"/>
+            <path d="M112 46 C102 34 122 24 112 10"/>
+            <path d="M134 44 C124 34 144 26 134 14"/>
+          </g>
+
+          <!-- آب و موج سطح آن (داخل لیوان بریده می‌شوند) -->
+          <g clip-path="url(#clip)">
+            <rect class="water" x="30" y="86" width="160" height="190"/>
+            <path class="wave" d="M30 86 q20 -8 40 0 t40 0 t40 0 t40 0 V96 H30Z"/>
+          </g>
+
+          <!-- خط دور لیوان -->
+          <path class="rim" d="M40 60 H180 L164 246 Q162 262 146 262 H74 Q58 262 56 246 Z"/>
+
+          <!-- نخ و برچسب teabag -->
+          <path class="string" d="M110 92 C112 70 120 56 128 40"/>
+          <rect class="tag" x="122" y="28" width="18" height="14" rx="2"/>
+        </svg>
+      </figure>
+
+      <!-- نمایش زمان باقی‌مانده و پیام وضعیت (هر دو را جاوااسکریپت پر می‌کند) -->
+      <p class="time" id="time" aria-label="Time remaining">25:00</p>
+      <p class="status" id="status" role="status">Green tea, ready when you are.</p>
+
+      <!-- دکمه‌های شروع/توقف و ریست -->
+      <div class="controls">
+        <button class="btn main" id="start" type="button">Start</button>
+        <button class="btn" id="reset" type="button">Reset</button>
+      </div>
+    </section>
+
+
+    <!-- ============================================================
+         ستون کناری (راست): انتخاب دم‌کرده، شمارندهٔ فنجان‌ها، لیست کارها
+         ============================================================ -->
+    <aside class="side">
+
+      <!-- ۱) انتخاب نوع چای (مدت تایمر)
+           data-key = اسم چای ، data-min = مدت به دقیقه (script.js از این‌ها می‌خواند) -->
+      <section aria-labelledby="brews-title">
+        <h2 id="brews-title">Choose a brew</h2>
+        <div class="brews" id="brews" role="radiogroup" aria-label="Brew length">
+          <button type="button" role="radio" aria-checked="true" data-key="green" data-min="25">
+            <strong>Green</strong><span>25 min focus</span>
+          </button>
+          <button type="button" role="radio" aria-checked="false" data-key="black" data-min="50">
+            <strong>Black</strong><span>50 min deep work</span>
+          </button>
+          <button type="button" role="radio" aria-checked="false" data-key="herbal" data-min="5">
+            <strong>Herbal</strong><span>5 min break</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ۲) شمارندهٔ فنجان‌های امروز -->
+      <section aria-labelledby="cups-title">
+        <h2 id="cups-title">Cups today</h2>
+        <p class="cups"><span id="cupCount">0</span> finished</p>
+        <!-- آیکن فنجان‌ها با جاوااسکریپت اینجا ساخته می‌شوند -->
+        <div class="cup-row" id="cupRow" aria-hidden="true"></div>
+      </section>
+
+      <!-- ۳) لیست کارها -->
+      <section aria-labelledby="tasks-title">
+        <h2 id="tasks-title">What are you working on?</h2>
+
+        <!-- فرم افزودن کار جدید -->
+        <form class="add" id="taskForm">
+          <!-- label مخصوص screen reader؛ روی صفحه دیده نمی‌شود (کلاس sr) -->
+          <label class="sr" for="taskInput">New task</label>
+          <input id="taskInput" type="text" placeholder="Finish the gallery filter" maxlength="80" autocomplete="off">
+          <button class="btn" type="submit">Add task</button>
+        </form>
+
+        <!-- پیام خطا (مثلاً وقتی کار خالی ثبت شود) -->
+        <p class="err" id="taskErr" role="alert"></p>
+
+        <!-- خود لیست؛ آیتم‌ها را جاوااسکریپت می‌سازد -->
+        <ul class="tasks" id="tasks"></ul>
+
+        <!-- پیام «لیست خالی است»؛ وقتی کاری وجود دارد مخفی می‌شود -->
+        <p class="empty" id="empty">Add one task to start your first cup.</p>
+      </section>
+
+    </aside>
+  </main>
+
+
+  <!-- فوتر -->
+  <footer class="foot">Your tasks and cups are saved in this browser only.</footer>
+
+  <!-- اسکریپت در انتهای body است تا اول همهٔ المان‌ها ساخته شوند -->
+  <script src="script(1).js"></script>
+</body>
+
+</html>
